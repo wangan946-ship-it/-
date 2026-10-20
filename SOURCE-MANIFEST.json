@@ -6,13 +6,13 @@
   },
   {
     "path": "mobile/IOS_WINDOWS.md",
-    "bytes": 6339,
-    "sha256": "765d65d78a84f041e912f2af11826d45b80ba36ddfd71865a126c35422eebcb9"
+    "bytes": 8469,
+    "sha256": "eb5025693cb596d75bd983217e94d38c2b8ebcd6c031b1c8c8efeff297131b33"
   },
   {
     "path": "mobile/THIRD_PARTY.md",
-    "bytes": 2386,
-    "sha256": "22fd02cea0878a38b5ec5c5f5642fcefeeb7805795bf7498584a795f3c1c6a9e"
+    "bytes": 3041,
+    "sha256": "ad481d5ffad242b7eae6a57d7dbce3ea25e1e8ec12ef42729b06ce369ca48512"
   },
   {
     "path": "mobile/capacitor.config.ts",
@@ -91,8 +91,8 @@
   },
   {
     "path": "mobile/ios/App/App/LocalMediaPlugin.swift",
-    "bytes": 18591,
-    "sha256": "25f38763c255ca9a95fe795cd2b086930f2081b6de236732a3fa461c75cf3b55"
+    "bytes": 18581,
+    "sha256": "d92c6e6c194be2674d1c8fab3550f4b612e1937be5b2b1a9dfacd3c926d11f3a"
   },
   {
     "path": "mobile/ios/App/App/LocalViewController.swift",
@@ -126,8 +126,8 @@
   },
   {
     "path": "mobile/ios/App/AppTests/BridgeTests.swift",
-    "bytes": 10866,
-    "sha256": "709df59915295244466309fb539d4f6bd123e39c596e07719f1ddb70aa0477d0"
+    "bytes": 11663,
+    "sha256": "7deb235eca006b4d7bd49f227a146e56eb3cbbb616ef1153770872e9fd715b70"
   },
   {
     "path": "mobile/ios/App/AppTests/NativeTests.swift",
@@ -166,13 +166,18 @@
   },
   {
     "path": "mobile/policy.json",
-    "bytes": 1356,
-    "sha256": "b5e739335d5ae7724ae61d33faba1d790f23863535d580da1739458d9db6d1dc"
+    "bytes": 1345,
+    "sha256": "42fd2ed655af763e2056c0940f8a6913614f874638b5c1e718513ead6fc84362"
   },
   {
     "path": "mobile/scripts/check-ios.mjs",
     "bytes": 4018,
     "sha256": "4a4e5233f36c54016836b6650acb0a81ac6c8f95cf417e0c249a74ccbc5a4344"
+  },
+  {
+    "path": "mobile/scripts/export-ios-source.py",
+    "bytes": 3589,
+    "sha256": "7d668f738cb4ebe62b523829f2819ed5f3049b6242b5a9f2f5a7bbaa6d2a61c2"
   },
   {
     "path": "mobile/scripts/package-ios.py",
@@ -216,13 +221,13 @@
   },
   {
     "path": "mobile/src/parser.test.ts",
-    "bytes": 24521,
-    "sha256": "599f216ba9a3b35ee3c7add657171e1549f6b29a13cc7b4ece75b163ecf97bbc"
+    "bytes": 24664,
+    "sha256": "ff3194db89ea30adba04b403de23b7dd5634377fd89b96bedea69418e3cd783d"
   },
   {
     "path": "mobile/src/parser.ts",
-    "bytes": 20917,
-    "sha256": "4ebaa23b4da44eeb3327331db6c8a513b1a57cb13d8cf335ea9b6e99f5e4c351"
+    "bytes": 20914,
+    "sha256": "ffca72c413ed1d71f39763f162e2fb145acd34ea48a000e96221e4338bf65095"
   },
   {
     "path": "mobile/src/style.css",

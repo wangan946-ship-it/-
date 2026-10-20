@@ -19,3 +19,5 @@ Vite、TypeScript、Vitest、Testing Library 等仅用于开发与测试；具�
 应用图标来自本项目已有几何图标，由 `scripts/generate-icons.py` 复用生成，无外部商标素材。发布二进制时应保留各实际包含依赖的版权与许可证通知；`node_modules` 和原生依赖内含对应许可证文件。
 
 1.0.3 小红书原片键结构调研参考 [media-parser 的小红书字段说明](https://github.com/ucmao/media-parser/blob/main/docs/parsers/xiaohongshu.md) 与 [rednote_downloader](https://github.com/SeanLi-Coder/rednote_downloader)。仅参考公开数据字段，未复制或集成其代码、Cookie、签名或浏览器登录流程；实际选择规则、路径格式校验、全文件 MD5 核对为本项目独立实现，并经真实公开页面与文件核验。Android 使用系统 MessageDigest，iOS 使用系统 CryptoKit，无新增运行依赖。诊断帧提取工具仅在 `.local/xhs-watermark/python-tools/`，不进入 APK 或生产依赖。
+
+iOS 云端验收发现旧 `api5-normal-c-hl.amemv.com` 在海外 DNS 返回回环地址。参考 [media-parser 的公开接口字段说明](https://github.com/ucmao/media-parser/blob/main/docs/parsers/douyin.md)，独立核验了官方 `aweme.snssdk.com` 同一路径的匿名 JSON 响应：目标作品编号及分享、下载允许标记均匹配。手机版本采用后者的固定域名、路径与参数；不使用该项目的签名、Cookie 注入、地区伪装、播放地址改写或受保护接口逻辑。没有新增第三方解析服务或复制第三方代码；每次请求仍检查 DNS、TLS、重定向、作品身份和访问权限。

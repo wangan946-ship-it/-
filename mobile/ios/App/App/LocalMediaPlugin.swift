@@ -129,7 +129,7 @@ public class LocalMediaPlugin: CAPPlugin, CAPBridgedPlugin {
             try self.throttle()
             let scope = call.getString("scope") ?? "", raw = call.getString("url") ?? ""
             guard ["xhsPage", "douyinPage", "douyinApi"].contains(scope) else { throw MediaFailure("invalid_scope", "请求类型无效。") }
-            if scope == "douyinApi" && raw.range(of: #"^https://api5-normal-c-hl\.amemv\.com/aweme/v1/feed/\?aweme_id=[0-9]{15,22}&aid=1128$"#, options: .regularExpression) == nil {
+            if scope == "douyinApi" && raw.range(of: #"^https://aweme\.snssdk\.com/aweme/v1/feed/\?aweme_id=[0-9]{15,22}&aid=1128$"#, options: .regularExpression) == nil {
                 throw MediaFailure("invalid_item", "作品接口地址无效。")
             }
             let token = UUID().uuidString.lowercased(), operation = self.op(token, seconds: 20)

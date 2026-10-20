@@ -50,6 +50,19 @@ final class BridgeTests: XCTestCase {
             catch (error) { return error.code; }
             """)
         XCTAssertEqual(result as? String, "unsafe_url")
+        let endpointErrors = try await script(web, """
+            const values = [];
+            for (const url of [
+              'https://aweme.snssdk.com/aweme/v1/feed/?aweme_id=6961737553342991651&aid=1128&extra=1',
+              'https://aweme.snssdk.com.evil.test/aweme/v1/feed/?aweme_id=6961737553342991651&aid=1128',
+              'https://aweme.snssdk.com/aweme/v1/user/?aweme_id=6961737553342991651&aid=1128'
+            ]) {
+              try { await window.Capacitor.nativePromise('LocalMedia','request',{url,scope:'douyinApi'}); values.push('unexpected-success'); }
+              catch (error) { values.push(error.code); }
+            }
+            return values;
+            """)
+        XCTAssertEqual(endpointErrors as? [String], ["invalid_item", "invalid_item", "invalid_item"])
     }
     @MainActor func testLocalFilePreviewPhotosAndShare() async throws {
         let web = try await webView(), store = try MediaStore(), id = UUID().uuidString.lowercased()

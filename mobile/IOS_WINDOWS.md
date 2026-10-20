@@ -4,16 +4,18 @@
 
 ## 当前状态（2026-10-20）
 
-- Windows 已通过：93 项共用解析器/React 测试、TypeScript/Vite 构建、Capacitor iOS 资源同步、Xcode 工程结构与权限配置检查。
+- Windows 已通过：104 项共用解析器/React 测试、TypeScript/Vite 构建、Capacitor iOS 资源同步、Xcode 工程结构与权限配置检查。另有 5 项 Android/JVM 联网测试在默认命令中跳过，不计入 iOS 原生验收。
 - 源码包已在全新目录解压验证：离线按锁文件安装 230 个依赖包、前端构建、iOS 同步和工程预检通过。首次检查发现遗漏 `pnpm-workspace.yaml` 导致 esbuild 构建脚本被拦截，补齐配置后复测通过。
 - 新增苹果端 XCTest：HTTP 边界/分块响应/超时/取消/匿名访客隔离/SQLite 生命周期，原生桥注册、图片预览、系统分享、添加相册，以及真实小红书原片、抖音图文、抖音视频的端到端测试。
 - Swift 改动：按 Content-Length 结束已完成的下载，避免等待 CDN 关闭连接；拒绝无效文件大小；静态 WebP 在写入相册时生成 PNG 副本，原文件保留。动态 WebP、超大分辨率或不支持格式提示使用原文件分享；没有修改或重新编码视频。
-- **以上 Swift 代码和 XCTest 尚未在 Xcode 上编译或执行。尚未生成 IPA，尚未完成签名、真机安装和真机验收。**
+- 首轮云端 Xcode 26.6（17F113）模拟器编译通过；20 项 XCTest 中 16 通过、4 失败，15 项原生基础测试全部通过。失败定位：抖音匿名 API 在海外 DNS 返回回环地址；视频预加载与图片像素倍率的测试断言不正确；前一失败用例的界面状态未隔离。对应修复已提交，正在重跑全部检查。[首次运行记录](https://github.com/wangan946-ship-it/-/actions/runs/39441009679)。
+- 第二轮完整运行：19/20 项通过。用户小红书原片的完整校验、HEVC 播放与相册保存通过；抖音图文、图片预览、系统分享通过。剩余旧抖音视频未取得公开数据，已核实并改用官方匿名 `aweme.snssdk.com` 入口；原样本的桌面原生完整下载和固定散列复测通过，继续提交云端验收。[第二轮记录](https://github.com/wangan946-ship-it/-/actions/runs/39444231966)。
+- **尚未生成 IPA，尚未完成签名、真机安装和真机验收。** 最终结果以成功运行对应的 `verification.json` 为准。
 - 用户已同意将整理后的 iOS 源码和测试样本链接上传到当前公开 GitHub 仓库，并运行云端编译。上传和运行结果以 GitHub Actions 的实际记录为准。
 
 ## 不需要购买 Mac
 
-GitHub Actions 提供云端 macOS 运行环境。项目使用 Capacitor 8，要求 Xcode 26+。工作流为 `.github/workflows/ios-candidate.yml`，支持手动触发；为完成本次获准的云端验收，推送到 `main` 的手机工程或工作流变更也会自动运行全部测试。
+GitHub Actions 提供云端 macOS 运行环境。项目使用 Capacitor 8，要求 Xcode 26+。工作流为 `.github/workflows/ios-candidate.yml`，支持手动触发；推送到 `main` 的手机代码或工作流变更也会运行全部测试。仅更新说明文档不会重跑；新代码会取消被替代版本的排队或执行任务。
 
 官方依据：[GitHub 托管运行器](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)、[Capacitor 8 环境要求](https://capacitorjs.com/docs/updating/8-0)。私有仓库使用账号包含的 Actions 额度；额度不足时先停止，不为此任务购买服务或开通额外付费额度。
 
@@ -59,6 +61,14 @@ GitHub Actions 提供云端 macOS 运行环境。项目使用 Capacitor 8，要�
 - [Apple Personal Team 限制](https://developer.apple.com/help/account/basics/about-your-developer-account)
 
 免费签名通常需要每 7 天续签，续签时需要电脑；日常解析和播放仍在手机内独立运行。按官方步骤在可信的 Windows 电脑安装依赖并允许设备连接，必要时在手机开启开发者模式。
+
+拿到候选 IPA 后按以下顺序操作：
+
+1. 按上面的官方教程，在 Windows 安装 AltServer、iTunes 和 iCloud；用数据线连接、解锁并信任 iPhone，在 iTunes 开启 Wi-Fi 同步。
+2. 从 Windows 任务栏 AltServer 菜单选择 **Install AltStore → 你的 iPhone**，在官方工具内使用自己的 Apple 账号。随后按手机提示信任开发者，并在 **设置 → 隐私与安全 → 开发者模式** 中开启开发者模式。
+3. 将 `liuying-ios-1.0.4-unsigned.ipa` 传到 iPhone 的“文件”，保持 Windows AltServer 运行且电脑与手机在同一局域网。在 AltStore 的 **My Apps → ＋** 选择该文件，等待签名和安装“留影”。
+4. 打开“留影”后即可在手机粘贴分享链接、解析并下载原片。点击“保存到相册”时才申请添加照片权限；无需启动本项目的 Python、Docker 或网页服务器。
+5. 在签名到期前，通过同一台运行 AltServer 的 Windows 电脑刷新签名。首次安装、续签和真机验收仍需在你自己的设备上完成。
 
 ## 最终交付前的真机验收
 

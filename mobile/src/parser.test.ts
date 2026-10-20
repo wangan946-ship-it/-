@@ -284,6 +284,9 @@ describe("不依赖服务端的完整解析", () => {
     const probe = vi.fn().mockResolvedValue({ mime: "video/mp4", size: 1000 });
     expect((await parseShare(`https://www.douyin.com/video/${id}`, { request, probe }, settings)).media_type).toBe("video");
     expect(request).toHaveBeenCalledTimes(1);
+    expect(request.mock.calls[0][0]).toEqual({
+      scope: "douyinApi", url: `https://aweme.snssdk.com/aweme/v1/feed/?aweme_id=${id}&aid=1128`,
+    });
   });
   it.each([
     { status_code: 0, aweme_list: [{ ...item(), video_control: { allow_download: false } }] },
@@ -304,7 +307,7 @@ describe("不依赖服务端的完整解析", () => {
   });
   it("抖音短链经原生请求解析；不使用 /api 或 localhost", async () => {
     const request = vi.fn().mockResolvedValueOnce({ url: `https://www.douyin.com/video/${id}`, body: "" })
-      .mockResolvedValueOnce({ url: "https://api5-normal-c-hl.amemv.com/", body: JSON.stringify({ status_code: 0, aweme_list: [item()] }) });
+      .mockResolvedValueOnce({ url: "https://aweme.snssdk.com/", body: JSON.stringify({ status_code: 0, aweme_list: [item()] }) });
     const probe = vi.fn().mockResolvedValue({ mime: "video/mp4", size: 1000 });
     const result = await parseShare("https://v.douyin.com/abcd/", { request, probe }, settings);
     expect(result.platform).toBe("douyin"); expect(result.watermark_status).toBe("unknown");

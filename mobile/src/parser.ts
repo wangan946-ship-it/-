@@ -269,12 +269,12 @@ export async function parseShare(text: string, transport: Transport, settings: S
     if (!id) return fail("unsupported_link", "仅支持抖音单条作品链接。");
     try {
       const response = await transport.request({
-        url: `https://api5-normal-c-hl.amemv.com/aweme/v1/feed/?aweme_id=${id}&aid=1128`, scope: "douyinApi",
+        url: `https://aweme.snssdk.com/aweme/v1/feed/?aweme_id=${id}&aid=1128`, scope: "douyinApi",
       });
       result = extractDouyin(readDouyinJSON(response.body), id, allowed);
     }
     catch (e) {
-      // This legacy anonymous API can resolve to loopback outside China.
+      // An unavailable anonymous API must not block an independent public page.
       // Never connect to that address: the independent official public page
       // still applies the same DNS, TLS, permission and exact-work checks.
       // Explicit source/download/DRM denials and conflicting data are terminal.
