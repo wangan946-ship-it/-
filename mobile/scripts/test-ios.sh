@@ -40,6 +40,7 @@ xcrun simctl boot "$simulator"
 xcrun simctl bootstatus "$simulator" -b
 project="ios/App/App.xcodeproj"
 derived="$out/DerivedData"
+echo "Building iPhone 14 Pro Max simulator test bundle..."
 xcodebuild -project "$project" -scheme App -configuration Debug \
   -destination "platform=iOS Simulator,id=$simulator" -derivedDataPath "$derived" \
   CODE_SIGNING_ALLOWED=NO LIUYING_LIVE_NETWORK="$live" build-for-testing \
@@ -69,12 +70,14 @@ assert count == 1, f"Expected one hosted test target, got {count}"
 p.write_bytes(plistlib.dumps(value))
 PY
 specs=("$derived/Build/Products/"*.xctestrun)
+echo "Simulator compilation passed. Running native and live platform tests..."
 xcodebuild test-without-building -xctestrun "${specs[0]}" \
   -destination "platform=iOS Simulator,id=$simulator" -parallel-testing-enabled NO \
   -test-timeouts-enabled YES -default-test-execution-time-allowance 480 -maximum-test-execution-time-allowance 600 \
   -resultBundlePath "$out/tests.xcresult" \
   > "$out/tests.log" 2>&1 || { tail -n 100 "$out/tests.log"; exit 1; }
 # A Release build catches code excluded from the Debug simulator build.
+echo "Simulator tests passed. Building unsigned iPhone Release..."
 xcodebuild -project "$project" -scheme App -configuration Release -sdk iphoneos \
   -destination "generic/platform=iOS" -derivedDataPath "$derived" \
   CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build \

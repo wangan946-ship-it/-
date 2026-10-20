@@ -111,8 +111,8 @@
   },
   {
     "path": "mobile/ios/App/App/SafeHTTP.swift",
-    "bytes": 23189,
-    "sha256": "61591899cbb567f2ccd4ee14d31c6094bbe85ac270d3c99ddeadc160d5393fe5"
+    "bytes": 23625,
+    "sha256": "fc960b60ea4d115e3de74d2b937570c4d58d45270b1284c059e69e7b139a0aa0"
   },
   {
     "path": "mobile/ios/App/App/SceneDelegate.swift",
@@ -126,8 +126,8 @@
   },
   {
     "path": "mobile/ios/App/AppTests/BridgeTests.swift",
-    "bytes": 9320,
-    "sha256": "96750017314ec09ed9da2e5a494a284efb5cd86fbea9bfb7c33a4b7227b3dc27"
+    "bytes": 10866,
+    "sha256": "709df59915295244466309fb539d4f6bd123e39c596e07719f1ddb70aa0477d0"
   },
   {
     "path": "mobile/ios/App/AppTests/NativeTests.swift",
@@ -186,8 +186,8 @@
   },
   {
     "path": "mobile/scripts/test-ios.sh",
-    "bytes": 5167,
-    "sha256": "fe46d0855b0ca7b327b167a5cc8e1024d89322217a713cb407a42f7206246446"
+    "bytes": 5372,
+    "sha256": "a1055c556fe276a0f16eb82c432ab94fba49681a2d5d9256c063be5f8a649054"
   },
   {
     "path": "mobile/src/App.test.tsx",

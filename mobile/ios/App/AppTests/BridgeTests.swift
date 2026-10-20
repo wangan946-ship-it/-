@@ -5,6 +5,19 @@ import CryptoKit
 @testable import App
 
 final class BridgeTests: XCTestCase {
+    @MainActor private func freshPage() async throws -> WKWebView {
+        let web = try await webView()
+        // A failed import must not leave its error or result in the next case.
+        _ = try await script(web, "document.documentElement.dataset.qaReload = 'pending'; return true;")
+        web.reload()
+        for _ in 0..<150 {
+            if (try? await script(web, "return !document.documentElement.dataset.qaReload && !!document.querySelector('#share-text') && !!window.Capacitor?.nativePromise;")) as? Bool == true {
+                return web
+            }
+            try await Task.sleep(nanoseconds: 200_000_000)
+        }
+        throw MediaFailure("test_startup", "Fresh app page did not start within 30 seconds")
+    }
     @MainActor private func webView() async throws -> WKWebView {
         for _ in 0..<150 {
             let windows = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap { $0.windows }
@@ -42,7 +55,8 @@ final class BridgeTests: XCTestCase {
         let web = try await webView(), store = try MediaStore(), id = UUID().uuidString.lowercased()
         defer { try? store.remove(id) }
         let file = try store.file(id, mime: "image/png")
-        let png = UIGraphicsImageRenderer(size: CGSize(width: 32, height: 32)).pngData { context in
+        let format = UIGraphicsImageRendererFormat(); format.scale = 1
+        let png = UIGraphicsImageRenderer(size: CGSize(width: 32, height: 32), format: format).pngData { context in
             UIColor.blue.setFill(); context.fill(CGRect(x: 0, y: 0, width: 32, height: 32))
         }
         try png.write(to: file)
@@ -72,36 +86,42 @@ final class BridgeTests: XCTestCase {
     }
     @MainActor private func importAndSave(_ web: WKWebView, share: String, video: Bool) async throws -> [String: Any] {
         let value = try await script(web, """
-            const wait = async (predicate, seconds) => {
+            const wait = async (stage, predicate, seconds) => {
               const end = Date.now() + seconds * 1000;
               while (Date.now() < end) {
                 const value = predicate(); if (value) return value;
                 const error = document.querySelector('.error');
-                if (error) throw new Error(error.textContent);
+                if (error) throw new Error(stage + ': ' + error.textContent);
+                const player = document.querySelector('.asset video');
+                if (player?.error) throw new Error(stage + ': media error ' + player.error.code);
                 await new Promise(r => setTimeout(r, 200));
               }
-              throw new Error('iOS end-to-end timeout');
+              const player = document.querySelector('.asset video');
+              throw new Error(stage + ': timeout; readyState=' + player?.readyState + '; networkState=' + player?.networkState);
             };
             const field = document.querySelector('#share-text');
             Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set.call(field, share);
             field.dispatchEvent(new Event('input', { bubbles:true }));
             await new Promise(r => setTimeout(r, 0));
-            const parse = await wait(() => [...document.querySelectorAll('button')].find(b => b.textContent.trim() === '解析素材' && !b.disabled), 10);
+            const parse = await wait('input ready', () => [...document.querySelectorAll('button')].find(b => b.textContent.trim() === '解析素材' && !b.disabled), 10);
             parse.click();
-            await wait(() => document.querySelector('[aria-label="解析结果"] .asset'), 90);
+            await wait('parse', () => document.querySelector('[aria-label="解析结果"] .asset'), 90);
             const button = [...document.querySelectorAll('.asset button')].find(b => b.textContent.includes(video ? '下载视频到本机' : '下载图片到本机'));
             if (!button) throw new Error('wrong media type');
             button.click();
-            await wait(() => [...document.querySelectorAll('.asset button')].some(b => b.textContent.includes('已保存到本机')), 310);
+            await wait('download', () => [...document.querySelectorAll('.asset button')].some(b => b.textContent.includes('已保存到本机')), 310);
             if (video) {
               const player = document.querySelector('.asset video');
-              await wait(() => player && player.readyState >= 2 && player.videoWidth > 0, 30);
+              // The UI deliberately preloads metadata only. Playback starts
+              // loading frames, so waiting for HAVE_CURRENT_DATA first stalls.
+              await wait('video metadata', () => player && player.readyState >= 1 && player.videoWidth > 0, 30);
               player.muted = true;
-              await player.play();
-              await wait(() => player.currentTime > 0, 10);
+              await Promise.race([player.play(), new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('video play promise timeout')), 15000))]);
+              await wait('video playback', () => player.currentTime > 0, 10);
               player.pause();
             } else {
-              await wait(() => { const image = document.querySelector('.asset img'); return image?.complete && image.naturalWidth > 0; }, 20);
+              await wait('image preview', () => { const image = document.querySelector('.asset img'); return image?.complete && image.naturalWidth > 0; }, 20);
             }
             const records = (await window.Capacitor.nativePromise('LocalMedia', 'list', {})).items;
             return records.sort((a,b) => b.createdAt-a.createdAt)[0];
@@ -112,7 +132,7 @@ final class BridgeTests: XCTestCase {
         guard ProcessInfo.processInfo.environment["LIUYING_LIVE_NETWORK"] == "1" else {
             throw XCTSkip("Live platform verification was not requested; no candidate IPA may be released.")
         }
-        let web = try await webView()
+        let web = try await freshPage()
         let row = try await importAndSave(web, share: "https://xhslink.cn/o/5DgIAnhxxhB", video: true)
         let id = try XCTUnwrap(row["id"] as? String), path = try XCTUnwrap(row["path"] as? String)
         defer { try? MediaStore().remove(id) }
@@ -126,7 +146,7 @@ final class BridgeTests: XCTestCase {
         guard ProcessInfo.processInfo.environment["LIUYING_LIVE_NETWORK"] == "1" else {
             throw XCTSkip("Live platform verification was not requested.")
         }
-        let web = try await webView()
+        let web = try await freshPage()
         let row = try await importAndSave(web, share: "https://v.douyin.com/CyXS6O9dtUM/", video: false)
         let id = try XCTUnwrap(row["id"] as? String)
         defer { try? MediaStore().remove(id) }
@@ -139,7 +159,7 @@ final class BridgeTests: XCTestCase {
         guard ProcessInfo.processInfo.environment["LIUYING_LIVE_NETWORK"] == "1" else {
             throw XCTSkip("Live platform verification was not requested.")
         }
-        let web = try await webView()
+        let web = try await freshPage()
         let row = try await importAndSave(web, share: "https://www.douyin.com/video/6961737553342991651", video: true)
         let id = try XCTUnwrap(row["id"] as? String), path = try XCTUnwrap(row["path"] as? String)
         defer { try? MediaStore().remove(id) }

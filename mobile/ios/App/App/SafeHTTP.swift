@@ -159,10 +159,19 @@ enum SafeHTTP {
                 var address = value.ai_addr.withMemoryRebound(to: sockaddr_in6.self, capacity: 1) { $0.pointee.sin6_addr }
                 bytes = withUnsafeBytes(of: &address) { Array($0) }
             } else { throw MediaFailure("blocked_address", "来源地址类型不受支持。") }
-            guard publicAddress(bytes) else { throw MediaFailure("blocked_address", "来源包含内网或保留地址，已拒绝访问。") }
             var numeric = [CChar](repeating: 0, count: Int(NI_MAXHOST))
             guard getnameinfo(value.ai_addr, value.ai_addrlen, &numeric, socklen_t(numeric.count), nil, 0, NI_NUMERICHOST) == 0 else {
                 throw MediaFailure("dns_failed", "来源地址无法识别。")
+            }
+            guard publicAddress(bytes) else {
+                #if DEBUG
+                if ProcessInfo.processInfo.environment["LIUYING_LIVE_NETWORK"] == "1" {
+                    // QA diagnostics contain only host/IP, never paths,
+                    // signed query parameters, responses or visitor cookies.
+                    print("Liuying QA DNS rejected host=\(host) address=\(String(cString: numeric))")
+                }
+                #endif
+                throw MediaFailure("blocked_address", "来源包含内网或保留地址，已拒绝访问。")
             }
             strings.append(String(cString: numeric)); next = value.ai_next
         }
