@@ -1,0 +1,8 @@
+node_modules/
+.local/
+.env
+mobile/dist/
+mobile/artifacts/
+mobile/ios/App/App/public/
+mobile/ios/App/App/capacitor.config.json
+**/xcuserdata/

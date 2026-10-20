@@ -1,0 +1,75 @@
+name: iOS candidate verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mobile/**"
+      - ".github/workflows/ios-candidate.yml"
+  workflow_dispatch:
+    inputs:
+      live_network:
+        description: "Verify real Douyin/Xiaohongshu links before producing an unsigned IPA"
+        type: boolean
+        default: true
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: ios-candidate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  verify-and-build:
+    runs-on: macos-26
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      IOS_QA_OUTPUT: ${{ github.workspace }}/mobile/artifacts/ios-qa
+      LIUYING_LIVE_NETWORK: ${{ (github.event_name == 'push' || inputs.live_network) && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install locked dependencies
+        run: |
+          npm install --global pnpm@11.25.0
+          pnpm install --frozen-lockfile
+      - name: Shared parser and UI tests
+        run: pnpm test
+      - name: Bundle the iOS app
+        run: |
+          pnpm sync:ios
+          pnpm check:ios
+      - name: iPhone simulator tests and unsigned device build
+        run: pnpm test:ios
+      - name: Package only after all live tests pass
+        if: github.event_name == 'push' || inputs.live_network
+        run: python3 scripts/package-ios.py artifacts/ios-qa
+      - name: Upload unsigned candidate
+        if: (github.event_name == 'push' || inputs.live_network) && success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liuying-ios-unsigned-${{ github.run_number }}
+          path: |
+            mobile/artifacts/ios-qa/liuying-*-unsigned.ipa
+            mobile/artifacts/ios-qa/*.sha256
+            mobile/artifacts/ios-qa/INSTALL.txt
+            mobile/artifacts/ios-qa/verification.json
+            mobile/artifacts/ios-qa/xcode-version.txt
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload build and test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-verification-logs-${{ github.run_number }}
+          path: |
+            mobile/artifacts/ios-qa/*.log
+            mobile/artifacts/ios-qa/verification.json
+            mobile/artifacts/ios-qa/xcode-version.txt
+          if-no-files-found: ignore
+          retention-days: 7

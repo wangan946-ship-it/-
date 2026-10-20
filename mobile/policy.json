@@ -1,0 +1,51 @@
+{
+  "xhsPage": [
+    "xiaohongshu.com",
+    "www.xiaohongshu.com",
+    "xhslink.com",
+    "www.xhslink.com",
+    "xhslink.cn",
+    "www.xhslink.cn"
+  ],
+  "douyinPage": [
+    "douyin.com",
+    "www.douyin.com",
+    "m.douyin.com",
+    "v.douyin.com",
+    "www.iesdouyin.com",
+    "iesdouyin.com"
+  ],
+  "douyinApi": [
+    "api5-normal-c-hl.amemv.com"
+  ],
+  "media": [
+    "api-hl.amemv.com",
+    "api-play-hl.amemv.com",
+    "p11-sign.douyinpic.com",
+    "p26-sign.douyinpic.com",
+    "p5-ex-gddgtc-sign.douyinpic.com",
+    "p5-sign.douyinpic.com",
+    "p9-sign.douyinpic.com",
+    "sns-bak-v1.xhscdn.com",
+    "sns-bak-v6.xhscdn.com",
+    "sns-video-bd.xhscdn.com",
+    "sns-video-hw.xhscdn.com",
+    "sns-video-qc.xhscdn.com",
+    "sns-video-v4.xhscdn.com",
+    "sns-webpic-bd.xhscdn.com",
+    "sns-webpic-hw.xhscdn.com",
+    "sns-webpic-qc.xhscdn.com",
+    "v11-cold-src.douyinvod.com",
+    "v26-colds.douyinvod.com",
+    "v5-jx-daily-cold.douyinvod.com",
+    "v5-se-bd-daily-cold.douyinvod.com",
+    "v5-se-jltc-colds.douyinvod.com",
+    "v5-se-sjy-daily-cold.douyinvod.com",
+    "v9-cold.douyinvod.com",
+    "v95-aw-cold.douyinvod.com",
+    "v95-bj-cold.douyinvod.com",
+    "v95-hzyy-thr-daily-colda.douyinvod.com",
+    "v95-se-zjwztc-cold.douyinvod.com",
+    "v95-zjjx2tc-cold.douyinvod.com"
+  ]
+}
