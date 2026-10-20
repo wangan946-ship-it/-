@@ -243,6 +243,34 @@ describe("不依赖服务端的完整解析", () => {
     expect(request.mock.calls[1][0]).toEqual({ scope: "douyinPage", url: shareUrl });
     expect(probe).toHaveBeenCalledExactlyOnceWith({ url: dyVideo });
   });
+  it.each(["dns_failed", "blocked_address", "tls_or_network_error", "network_error", "timeout"])(
+    "匿名接口网络不可用（%s）时独立校验同作品公开页", async code => {
+      const request = vi.fn().mockRejectedValueOnce(Object.assign(new Error("API unavailable"), { code }))
+        .mockResolvedValueOnce({ body: shareHtml(), url: shareUrl });
+      const probe = vi.fn().mockResolvedValue({ mime: "video/mp4", size: 1000 });
+      const result = await parseShare(`https://www.douyin.com/video/${id}`, { request, probe }, settings);
+      expect(result.media_urls).toEqual([dyVideo]);
+      expect(request.mock.calls[1][0]).toEqual({ scope: "douyinPage", url: shareUrl });
+      expect(probe).toHaveBeenCalledExactlyOnceWith({ url: dyVideo });
+    });
+  it.each(["source_denied", "access_denied", "cancelled", "unsafe_url", "host_not_allowed"])(
+    "匿名接口明确拒绝或取消（%s）时不继续请求", async code => {
+      const error = Object.assign(new Error("terminal"), { code });
+      const request = vi.fn().mockRejectedValue(error), probe = vi.fn();
+      await expect(parseShare(`https://www.douyin.com/video/${id}`, { request, probe }, settings)).rejects.toBe(error);
+      expect(request).toHaveBeenCalledTimes(1); expect(probe).not.toHaveBeenCalled();
+    });
+  it("接口不可用时仍拒绝公开页的推荐作品和下载限制", async () => {
+    const request = vi.fn().mockRejectedValueOnce({ code: "blocked_address" })
+      .mockResolvedValueOnce({ body: shareHtml([{ ...item(), aweme_id: "1111111111111111" }]), url: shareUrl });
+    const probe = vi.fn();
+    await expect(parseShare(`https://www.douyin.com/video/${id}`, { request, probe }, settings)).rejects.toThrow(`（${id}）`);
+    expect(probe).not.toHaveBeenCalled();
+    request.mockReset().mockRejectedValueOnce({ code: "dns_failed" })
+      .mockResolvedValueOnce({ body: shareHtml([{ ...item(), video_control: { allow_download: false } }]), url: shareUrl });
+    await expect(parseShare(`https://www.douyin.com/video/${id}`, { request, probe }, settings)).rejects.toThrow();
+    expect(probe).not.toHaveBeenCalled();
+  });
   it("短链已经返回可用分享页时复用，不再次请求", async () => {
     const request = vi.fn().mockResolvedValueOnce({ body: shareHtml(), url: shareUrl })
       .mockResolvedValueOnce({ body: '{"status_code":0,"aweme_list":[]}', url: "" });

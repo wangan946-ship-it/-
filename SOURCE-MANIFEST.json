@@ -216,13 +216,13 @@
   },
   {
     "path": "mobile/src/parser.test.ts",
-    "bytes": 22376,
-    "sha256": "9a924a084c97b6fc8afb49bfa47ccd8d7b120f500e146a3fc67cd44951453aa3"
+    "bytes": 24521,
+    "sha256": "599f216ba9a3b35ee3c7add657171e1549f6b29a13cc7b4ece75b163ecf97bbc"
   },
   {
     "path": "mobile/src/parser.ts",
-    "bytes": 20558,
-    "sha256": "e917efc9a9a9206bf25a1d4604c6fa3dd3532a3ca701202e0b9e8b6d371ba9ec"
+    "bytes": 20917,
+    "sha256": "4ebaa23b4da44eeb3327331db6c8a513b1a57cb13d8cf335ea9b6e99f5e4c351"
   },
   {
     "path": "mobile/src/style.css",

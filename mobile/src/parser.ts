@@ -267,14 +267,20 @@ export async function parseShare(text: string, transport: Transport, settings: S
       id = douyinId(validateUrl(sharedPage.url, hosts.douyinPage));
     }
     if (!id) return fail("unsupported_link", "仅支持抖音单条作品链接。");
-    const response = await transport.request({
-      url: `https://api5-normal-c-hl.amemv.com/aweme/v1/feed/?aweme_id=${id}&aid=1128`, scope: "douyinApi",
-    });
-    try { result = extractDouyin(readDouyinJSON(response.body), id, allowed); }
+    try {
+      const response = await transport.request({
+        url: `https://api5-normal-c-hl.amemv.com/aweme/v1/feed/?aweme_id=${id}&aid=1128`, scope: "douyinApi",
+      });
+      result = extractDouyin(readDouyinJSON(response.body), id, allowed);
+    }
     catch (e) {
-      // Only missing metadata can use the normal public share page. An explicit
-      // access/download/DRM denial, conflict or network failure is terminal.
-      if (!(e instanceof ParseError) || e.code !== "target_not_found") throw e;
+      // This legacy anonymous API can resolve to loopback outside China.
+      // Never connect to that address: the independent official public page
+      // still applies the same DNS, TLS, permission and exact-work checks.
+      // Explicit source/download/DRM denials and conflicting data are terminal.
+      const unavailable = !(e instanceof ParseError) &&
+        ["dns_failed", "blocked_address", "tls_or_network_error", "network_error", "timeout"].includes(str(obj(e).code));
+      if (!(e instanceof ParseError && e.code === "target_not_found") && !unavailable) throw e;
       const resolved = new URL(sharedPage?.url ?? url);
       const kind = /^\/(?:share\/)?(note|slides)\//.exec(resolved.pathname)?.[1] ?? "video";
       const canonicalPage = `https://www.iesdouyin.com/share/${kind}/${id}/`;
