@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - "mobile/**"
+      - "!mobile/*.md"
       - ".github/workflows/ios-candidate.yml"
   workflow_dispatch:
     inputs:
@@ -16,7 +17,7 @@ permissions:
   contents: read
 concurrency:
   group: ios-candidate-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   verify-and-build:
     runs-on: macos-26

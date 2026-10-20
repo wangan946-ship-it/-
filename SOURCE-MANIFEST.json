@@ -1,8 +1,8 @@
 [
   {
     "path": ".github/workflows/ios-candidate.yml",
-    "bytes": 2512,
-    "sha256": "c931a406929ec22bf49d4943ca1b816d8270f19d85b09db7cfdfd0b038c05e03"
+    "bytes": 2534,
+    "sha256": "77fdb0b38d2348dd9358e0ea04ce09821338cff0f0e22ef9853739d523d1bfac"
   },
   {
     "path": "mobile/IOS_WINDOWS.md",
